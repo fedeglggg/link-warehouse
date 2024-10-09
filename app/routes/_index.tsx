@@ -7,6 +7,7 @@ import { useLoaderData } from "@remix-run/react";
 import type { LoaderFunctionArgs } from "@remix-run/node"; // or cloudflare/deno
 
 import "~/styles/index.css";
+import { renderAutocompleteOption } from "~/helpers/renderAutocomplete";
 
 export const meta: MetaFunction = () => {
   return [
@@ -22,15 +23,16 @@ interface LinkFormValues {
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { API } = await import("~/routes/api");
   const links = await API.getLinks();
-  const formatedLinks = links.map(
-    (link, index) =>
-      `${link.id || ""} -${link.title || ""} - ${link.description || ""}`
-  );
-  return formatedLinks;
+  const formatedLinks = links.map((link, index) => {
+    /* return { value: link.id, label: link.description }; */
+    /* return `${link.id}`; */
+    return `${link.id || ""} - ${link.description || ""} - ${link.url || ""}`;
+  });
+  return { links, formatedLinks };
 };
 
 export default function Index() {
-  const formatedLinks = useLoaderData<typeof loader>();
+  const { links, formatedLinks } = useLoaderData<typeof loader>();
 
   console.log("FL", formatedLinks);
 
@@ -56,10 +58,11 @@ export default function Index() {
 
         <Autocomplete
           size="xl"
-          label="Describe el link que deseas buscar"
+          label="Descrive the link you want to search"
           placeholder="Description"
           limit={10}
           data={formatedLinks}
+          renderOption={(props) => renderAutocompleteOption(props, links)}
         />
       </Form>
     </div>
