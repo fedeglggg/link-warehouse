@@ -10,7 +10,6 @@ async function getLoaderData(linkId: string) {
       id: parseInt(linkId),
     },
   });
-  console.log("link loader", link);
 
   return link;
 }
@@ -21,7 +20,6 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 export default function Link() {
   const link = useLoaderData<typeof loader>();
-  console.log("link default", link);
   return (
     <div>
       <p>Product {link?.id}</p>

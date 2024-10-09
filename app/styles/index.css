@@ -1,0 +1,12 @@
+.c-container {
+  height: 100vh;
+  background-color: #1a1a1a;
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+}
+
+.form {
+  max-width: 600px;
+  width: 100%;
+}

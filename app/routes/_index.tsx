@@ -1,10 +1,12 @@
 import type { MetaFunction } from "@remix-run/node";
-import { AppShell, Button, Flex } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import { ActionToggle } from "~/ActionToggle";
+import { Autocomplete } from "@mantine/core";
+import { Form } from "@remix-run/react";
+import { useForm } from "@mantine/form";
+import { useLoaderData } from "@remix-run/react";
 
-/* import { ListLink } from "~/components/ListLink"; */
-import ListLink from "~/components/ListLink";
+import type { LoaderFunctionArgs } from "@remix-run/node"; // or cloudflare/deno
+
+import "~/styles/index.css";
 
 export const meta: MetaFunction = () => {
   return [
@@ -13,43 +15,53 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+interface LinkFormValues {
+  description: string;
+}
+
+export const loader = async ({ params }: LoaderFunctionArgs) => {
+  const { API } = await import("~/routes/api");
+  const links = await API.getLinks();
+  const formatedLinks = links.map(
+    (link, index) =>
+      `${link.id || ""} -${link.title || ""} - ${link.description || ""}`
+  );
+  return formatedLinks;
+};
+
 export default function Index() {
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
-  const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
+  const formatedLinks = useLoaderData<typeof loader>();
+
+  console.log("FL", formatedLinks);
+
+  const form = useForm<LinkFormValues>({
+    mode: "uncontrolled",
+    validateInputOnBlur: true,
+    initialValues: {
+      description: "",
+    },
+  });
 
   return (
-    <AppShell
-      padding="md"
-      header={{ height: 60 }}
-      navbar={{
-        width: 300,
-        breakpoint: "sm",
-        collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
-      }}>
-      <AppShell.Header>
-        {" "}
-        <ActionToggle />
-      </AppShell.Header>
-      <AppShell.Navbar>Navbar</AppShell.Navbar>
-      <AppShell.Main>
-        <Flex
-          mih={50}
-          bg="rgba(0, 0, 0, .3)"
-          gap="md"
-          justify="flex-start"
-          align="flex-start"
-          direction="row"
-          wrap="wrap">
-          <ListLink />
-        </Flex>
+    <div className="c-container">
+      <Form className="form" method="get" action="/links">
+        {/* <TextInput
+          withAsterisk
+          placeholder="Description"
+          name="description"
+          key={form.key("description")}
+          size="xl"
+          {...form.getInputProps("description")}
+        /> */}
 
-        {/* <Button onClick={toggleDesktop} visibleFrom="sm">
-          Toggle navbar
-        </Button>
-        <Button onClick={toggleMobile} hiddenFrom="sm">
-          Toggle navbar
-        </Button> */}
-      </AppShell.Main>
-    </AppShell>
+        <Autocomplete
+          size="xl"
+          label="Describe el link que deseas buscar"
+          placeholder="Description"
+          limit={10}
+          data={formatedLinks}
+        />
+      </Form>
+    </div>
   );
 }

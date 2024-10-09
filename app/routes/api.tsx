@@ -20,7 +20,6 @@ export const API = {
     title: any;
     description: any;
   }) {
-    console.log("creating");
     const result = db.link.create({
       data: { url: url, title: title, description: description },
     });

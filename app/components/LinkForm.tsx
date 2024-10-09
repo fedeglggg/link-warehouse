@@ -1,7 +1,7 @@
 import { Button, Checkbox, Group, TextInput } from "@mantine/core";
-import { useForm } from "@mantine/form";
 import { Form, useLoaderData } from "@remix-run/react";
-
+import { useForm } from "@mantine/form";
+import { FormEvent } from "react";
 interface LinkFormValues {
   url: string;
   description: string;
@@ -11,46 +11,40 @@ interface LinkFormValues {
 export function LinkForm() {
   const form = useForm<LinkFormValues>({
     mode: "controlled",
+    validateInputOnBlur: true,
     initialValues: {
       url: "",
       description: "",
       title: "",
     },
+    validate: {
+      url: (value) => (value.length < 5 ? "URL is too short" : null),
+      description: (value) =>
+        value.length < 5 ? "Description is too short" : null,
+      title: (value) => (value.length < 5 ? "Title is too short" : null),
+    },
   });
 
-  const handleSubmit = async (
+  const onSubmit = (
     values: LinkFormValues,
-    event?: React.FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement> | undefined
   ) => {
-    try {
-      const formData = new FormData();
-      for (const key in values) {
-        if (values.hasOwnProperty(key)) {
-          formData.append(key, values[key as keyof LinkFormValues]);
-        }
-      }
-      const response = await fetch("/links", {
-        method: "POST",
-        body: formData,
-      });
+    const result = form.validate();
+    console.log("result");
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error submitting form:", errorData);
-      } else {
-        const responseData = await response.json();
-        console.log("Form submitted successfully:", responseData);
-      }
-    } catch (error) {
-      console.error("Unexpected error:", error);
+    if (!form.isValid() || result.hasErrors) {
+      event?.preventDefault();
+      /* const formElement = event.currentTarget;
+      formElement.submit(); */
     }
   };
 
   return (
-    <form method="POST" action="/links" onSubmit={form.onSubmit(handleSubmit)}>
+    <Form method="post" action="/links" onSubmit={form.onSubmit(onSubmit)}>
       <TextInput
         withAsterisk
         placeholder="Title"
+        name="title"
         key={form.key("title")}
         {...form.getInputProps("title")}
       />
@@ -58,6 +52,7 @@ export function LinkForm() {
       <TextInput
         withAsterisk
         placeholder="URL"
+        name="url"
         key={form.key("url")}
         {...form.getInputProps("url")}
       />
@@ -65,6 +60,7 @@ export function LinkForm() {
       <TextInput
         withAsterisk
         placeholder="Description"
+        name="description"
         key={form.key("description")}
         {...form.getInputProps("description")}
       />
@@ -77,6 +73,6 @@ export function LinkForm() {
           Submit
         </Button>
       </Group>
-    </form>
+    </Form>
   );
 }
