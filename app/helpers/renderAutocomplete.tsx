@@ -1,25 +1,17 @@
-import {
-  Autocomplete,
-  AutocompleteProps,
-  Avatar,
-  ComboboxLikeRenderOptionInput,
-  ComboboxStringItem,
-  Group,
-  Text,
-} from "@mantine/core";
+import { AutocompleteProps, Group, Text } from "@mantine/core";
 
-export const renderAutocompleteOption = (
-  { option }: ComboboxLikeRenderOptionInput<ComboboxStringItem>,
-  links: any
-) => {
-  console.log("option", option);
+export const renderAutocompleteOption: AutocompleteProps["renderOption"] = ({
+  option,
+}) => {
   const splitted = option.value.split(" - ");
+  const label = splitted[1] || "";
+  const detail = splitted[2] || "";
 
   return (
     <Group gap="sm">
       <div>
-        <Text size="sm">{splitted[1] || ""}</Text>
-        <Text size="xs">{splitted[2] || ""}</Text>
+        <Text size="sm">{label}</Text>
+        <Text size="xs">{detail}</Text>
       </div>
     </Group>
   );

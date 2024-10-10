@@ -1,13 +1,11 @@
-import type { MetaFunction } from "@remix-run/node";
-import { Autocomplete } from "@mantine/core";
-import { Form } from "@remix-run/react";
-import { useForm } from "@mantine/form";
+import { Form, Link } from "@remix-run/react";
+import { Autocomplete, Button } from "@mantine/core";
 import { useLoaderData } from "@remix-run/react";
+import { renderAutocompleteOption } from "~/helpers/renderAutocomplete";
 
-import type { LoaderFunctionArgs } from "@remix-run/node"; // or cloudflare/deno
+import type { MetaFunction, LoaderFunctionArgs } from "@remix-run/node";
 
 import "~/styles/index.css";
-import { renderAutocompleteOption } from "~/helpers/renderAutocomplete";
 
 export const meta: MetaFunction = () => {
   return [
@@ -23,47 +21,37 @@ interface LinkFormValues {
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { API } = await import("~/routes/api");
   const links = await API.getLinks();
-  const formatedLinks = links.map((link, index) => {
-    /* return { value: link.id, label: link.description }; */
-    /* return `${link.id}`; */
+  const comboboxLinkStringData = links.map((link) => {
     return `${link.id || ""} - ${link.description || ""} - ${link.url || ""}`;
   });
-  return { links, formatedLinks };
+  return { links, comboboxLinkStringData };
 };
 
 export default function Index() {
-  const { links, formatedLinks } = useLoaderData<typeof loader>();
-
-  console.log("FL", formatedLinks);
-
-  const form = useForm<LinkFormValues>({
-    mode: "uncontrolled",
-    validateInputOnBlur: true,
-    initialValues: {
-      description: "",
-    },
-  });
+  const { comboboxLinkStringData } = useLoaderData<typeof loader>();
 
   return (
     <div className="c-container">
       <Form className="form" method="get" action="/links">
-        {/* <TextInput
-          withAsterisk
-          placeholder="Description"
-          name="description"
-          key={form.key("description")}
-          size="xl"
-          {...form.getInputProps("description")}
-        /> */}
-
         <Autocomplete
           size="xl"
           label="Descrive the link you want to search"
           placeholder="Description"
           limit={10}
-          data={formatedLinks}
-          renderOption={(props) => renderAutocompleteOption(props, links)}
+          data={comboboxLinkStringData}
+          renderOption={renderAutocompleteOption}
         />
+        <Button
+          fullWidth
+          justify="center"
+          variant="outline"
+          color="rgba(197, 199, 125, 1)"
+          size="md"
+          mt="md"
+          radius="xl"
+          type="submit">
+          <Link to={`/links/`}>New Link</Link>
+        </Button>
       </Form>
     </div>
   );

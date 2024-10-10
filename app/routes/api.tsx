@@ -1,4 +1,5 @@
 import db from "~/db.server";
+import { Prisma, PrismaClient, Link } from "@prisma/client";
 
 export const API = {
   async getLinks() {
@@ -11,19 +12,10 @@ export const API = {
       },
     });
   },
-  async createLink({
-    url,
-    title,
-    description,
-  }: {
-    url: any;
-    title: any;
-    description: any;
-  }) {
+  async createLink(data: Prisma.LinkCreateInput) {
     const result = db.link.create({
-      data: { url: url, title: title, description: description },
+      data: data,
     });
-    console.log("created", result);
 
     return result;
   },
