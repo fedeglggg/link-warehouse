@@ -3,10 +3,13 @@ import { Button, TextInput } from "@mantine/core";
 import { Form, Link } from "@remix-run/react";
 import { json } from "@remix-run/node";
 import { Prisma, PrismaClient } from "@prisma/client";
-
+import { IconCheck } from "@tabler/icons-react";
+import { Notification, rem } from "@mantine/core";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 
-import "~/styles/index.css";
+import "~/styles/links.css";
+import { useState } from "react";
+import ShowSuccessAlert from "~/components/Notification";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   /* const { API } = await import("~/routes/api");
@@ -20,6 +23,8 @@ interface LinkFormValues {
 }
 
 export default function LinkPage() {
+  const checkIcon = <IconCheck style={{ width: rem(20), height: rem(20) }} />;
+  const [openAlert, setOpenAlert] = useState(false);
   const form = useForm<Prisma.LinkCreateInput>({
     mode: "uncontrolled",
     validateInputOnBlur: true,
@@ -37,71 +42,93 @@ export default function LinkPage() {
     },
   });
 
-  const onSubmit = async (formData: any, event: React.FormEvent) => {
+  const handleSubmit = form.onSubmit((formData, event) => {
     console.log(formData);
     console.log(event);
-    event.preventDefault();
-  };
+    event?.preventDefault();
+    const formattedData = new FormData();
 
-  const handleSubmit = form.onSubmit((formdata, event) => {
-    console.log(formdata);
-    console.log(event);
-    const form = (event?.target as HTMLButtonElement).form; // Access the form element
-    if (form) {
-      form.submit(); // Submit the form programmatically
-    }
+    Object.entries(formData).forEach(([key, value]) => {
+      formattedData.append(key, value as string);
+    });
+
+    fetch("/links", {
+      method: "POST",
+      body: formattedData,
+      headers: {
+        // You generally don't need to set the Content-Type header for FormData.
+        // 'Content-Type': 'multipart/form-data', // Remove this line
+      },
+    })
+      .then((response) => {
+        form.reset();
+        console.log("success", response);
+        setOpenAlert(true);
+      })
+      .catch((error) => {
+        console.log("err", error);
+      });
   });
 
   return (
     <>
-      <div className="c-container">
-        <div className="items">
-          <Form
-            className="form"
-            method="post"
-            action="/links"
-            onSubmit={handleSubmit}>
-            <TextInput
-              withAsterisk
-              placeholder="Description"
-              name="description"
-              key={form.key("description")}
-              size="xl"
-              {...form.getInputProps("description")}
-            />
-            <TextInput
-              withAsterisk
-              placeholder="Url"
-              name="url"
-              key={form.key("url")}
-              size="xl"
-              mt="md"
-              {...form.getInputProps("url")}
-            />
-            <Button
-              fullWidth
-              justify="center"
-              variant="outline"
-              color="rgba(197, 199, 125, 1)"
-              size="md"
-              mt="md"
-              radius="lg"
-              type="submit">
-              Guardar
-            </Button>
-          </Form>
-          <Button
-            fullWidth
-            justify="center"
-            variant="outline"
-            color="rgba(197, 199, 125, 1)"
-            size="md"
-            mt="md"
-            radius="lg">
-            <Link to={`/`}>Buscar</Link>
-          </Button>
+      <div className="root">
+        <div className="c-container">
+          <div className="c-content">
+            <Form
+              className="form"
+              method="post"
+              action="/links"
+              onSubmit={handleSubmit}>
+              <TextInput
+                withAsterisk
+                placeholder="Description"
+                name="description"
+                key={form.key("description")}
+                size="xl"
+                {...form.getInputProps("description")}
+              />
+              <TextInput
+                withAsterisk
+                placeholder="Url"
+                name="url"
+                key={form.key("url")}
+                size="xl"
+                mt="md"
+                {...form.getInputProps("url")}
+              />
+              <Button
+                fullWidth
+                justify="center"
+                variant="outline"
+                color="rgba(197, 199, 125, 1)"
+                size="md"
+                mt="md"
+                radius="lg"
+                type="submit">
+                Guardar
+              </Button>
+            </Form>
+            <Link to={`/`}>
+              <Button
+                fullWidth
+                justify="center"
+                variant="outline"
+                color="rgba(197, 199, 125, 1)"
+                size="md"
+                mt="md"
+                radius="lg">
+                Buscar
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
+      <ShowSuccessAlert
+        title={"Se ha agregado un link"}
+        openAlert={openAlert}
+        setOpenAlert={setOpenAlert}
+      />
     </>
   );
 }

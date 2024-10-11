@@ -1,0 +1,12 @@
+.fadeOut {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+
+.notification {
+  z-index: 100;
+  position: absolute;
+  width: 500px;
+  left: 20px;
+  bottom: 20px;
+}

@@ -1,0 +1,20 @@
+.c-container {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  background-color: #1a1a1a;
+  height: 100vh;
+}
+
+.c-content {
+  max-width: 600px;
+  width: 100%;
+}
+
+.c-notification {
+  z-index: 100;
+  position: absolute;
+  width: 500px;
+  left: 20px;
+  bottom: 20px;
+}
