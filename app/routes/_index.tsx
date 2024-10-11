@@ -21,14 +21,14 @@ interface LinkFormValues {
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { API } = await import("~/routes/api");
   const links = await API.getLinks();
-  const comboboxLinkStringData = links.map((link) => {
+  const autoCompleteData = links.map((link) => {
     return `${link.id || ""} - ${link.description || ""} - ${link.url || ""}`;
   });
-  return { links, comboboxLinkStringData };
+  return { links, autoCompleteData };
 };
 
 export default function Index() {
-  const { comboboxLinkStringData } = useLoaderData<typeof loader>();
+  const { autoCompleteData } = useLoaderData<typeof loader>();
 
   return (
     <div className="c-container">
@@ -38,7 +38,7 @@ export default function Index() {
           label="Descrive the link you want to search"
           placeholder="Description"
           limit={10}
-          data={comboboxLinkStringData}
+          data={autoCompleteData}
           renderOption={renderAutocompleteOption}
         />
         <Button
